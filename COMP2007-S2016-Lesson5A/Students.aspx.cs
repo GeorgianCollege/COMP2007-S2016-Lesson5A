@@ -45,5 +45,41 @@ namespace COMP2007_S2016_Lesson5A
                 StudentsGridView.DataBind();
             }
         }
+
+        /**
+         * <summary>
+         * This method is used to delete Student records from the db using ef
+         * </summary>
+         * 
+         * @method StudentsGridView_RowDeleting
+         * @param {object} sender
+         * @param {GridViewDeleteEventArgs} e
+         * @return {void}
+         */
+        protected void StudentsGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            // store which row was selected for deletion
+            int selectedRow = e.RowIndex;
+
+            // get the selected StudentID using the grid's Datakey collection
+            int StudentID = Convert.ToInt32(StudentsGridView.DataKeys[selectedRow].Values["StudentID"]);
+
+            // use EF to find the selected student from DB and Remove it
+            using (DefaultConnection db = new DefaultConnection())
+            {
+                Student deletedStudent = (from studentRecords in db.Students
+                                          where studentRecords.StudentID == StudentID
+                                          select studentRecords).FirstOrDefault();
+
+                // remove the student record from the database
+                db.Students.Remove(deletedStudent);
+
+                // save changes to the db
+                db.SaveChanges();
+
+                // refresh the grid
+                this.GetStudents();
+            }
+        }
     }
 }
