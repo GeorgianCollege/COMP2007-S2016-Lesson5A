@@ -15,9 +15,34 @@ namespace COMP2007_S2016_Lesson5A
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if((!IsPostBack) && (Request.QueryString.Count > 0))
+            {
+                this.GetStudent();
+            }
         }
 
+        protected void GetStudent()
+        {
+            // populate the form with existing student record
+            int StudentID = Convert.ToInt32(Request.QueryString["StudentID"]);
+
+            // connect the DB with EF
+            using (DefaultConnection db = new DefaultConnection())
+            {
+                // populate a student instance with the StudentID from the URL parameter
+                Student updateStudent = (from student in db.Students
+                                         where student.StudentID == StudentID
+                                         select student).FirstOrDefault();
+
+                // map the student properties to the form controls
+                if(updateStudent != null)
+                {
+                    LastNameTextBox.Text = updateStudent.LastName;
+                    FirstNameTextBox.Text = updateStudent.FirstMidName;
+                    EnrollmentDateTextBox.Text = updateStudent.EnrollmentDate.ToString("yyyy-MM-dd");
+                }
+            }
+        }
 
         protected void CancelButton_Click(object sender, EventArgs e)
         {
